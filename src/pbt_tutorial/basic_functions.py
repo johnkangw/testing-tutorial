@@ -116,10 +116,7 @@ def safe_name(obj: Any, repr_allowed: bool=True) -> str:
     if hasattr(obj, "__name__"):
         return obj.__name__
 
-    if repr_allowed and hasattr(obj, "__repr__"):
-        return repr(obj)
-
-    return "<unknown>"
+    return repr(obj) if repr_allowed and hasattr(obj, "__repr__") else "<unknown>"
 
 
 def run_length_encoder(in_string: str) -> List[Union[str, int]]:
@@ -130,7 +127,7 @@ def run_length_encoder(in_string: str) -> List[Union[str, int]]:
     assert isinstance(in_string, str)
     out = []
     for item, group in groupby(in_string):
-        cnt = sum(1 for x in group)
+        cnt = sum(1 for _ in group)
         if cnt == 1:
             out.append(item)
         else:
@@ -146,13 +143,10 @@ def run_length_decoder(in_list: List[Union[str, int]]) -> str:
     >>> run_length_decoder(['a', 'a', 5, 'b', 'b', 2, 'c', 'b', 'c'])
     "aaaaabbcbc"
     """
-    out = ""
-    for n, item in enumerate(in_list):
-        if isinstance(item, int):
-            out += in_list[n - 1] * (item - 2)
-        else:
-            out += item
-    return out
+    return "".join(
+        in_list[n - 1] * (item - 2) if isinstance(item, int) else item
+        for n, item in enumerate(in_list)
+    )
 
 
 def pairwise_dists(x, y):
